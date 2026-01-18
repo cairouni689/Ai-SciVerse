@@ -45,7 +45,7 @@
 
     <style>
         /* CSS Fixes */
-        html, body { height: 100%; overflow: hidden; } /* Ensure full height */
+        html, body { height: 100%; overflow: hidden; } 
         
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -64,11 +64,21 @@
 
         .pop-menu { transform-origin: bottom right; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.95); opacity: 0; pointer-events: none; }
         .pop-menu.active { transform: scale(1); opacity: 1; pointer-events: auto; }
+        
+        /* Cursor blink effect for typing */
+        .cursor-blink::after {
+            content: '▋';
+            display: inline-block;
+            margin-right: 2px;
+            color: #00d4ff;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-brand-dark dark:text-gray-100 transition-colors duration-300 h-full flex flex-col">
 
-    <!-- Header (Fixed Height) -->
+    <!-- Header -->
     <header class="h-16 flex-none bg-white/95 dark:bg-brand-card/95 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-30 shadow-sm relative">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-sci-accent shadow-[0_0_15px_rgba(0,212,255,0.3)]">
@@ -102,9 +112,7 @@
 
         <div class="flex-1 overflow-y-auto p-3">
             <h3 class="text-xs font-semibold text-gray-400 mb-3 px-1">سجل المحادثات</h3>
-            <div id="historyList" class="space-y-2">
-                <!-- History Items go here -->
-            </div>
+            <div id="historyList" class="space-y-2"></div>
         </div>
 
         <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-brand-dark/30">
@@ -116,10 +124,10 @@
         </div>
     </aside>
 
-    <!-- Main Content Area (Flex Container) -->
+    <!-- Main Content -->
     <main class="flex-1 flex flex-col overflow-hidden w-full max-w-5xl mx-auto relative">
         
-        <!-- Welcome Screen (Absolute Center) -->
+        <!-- Welcome Screen -->
         <div id="welcomeScreen" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-0 transition-opacity duration-300 pointer-events-none">
             <div class="relative w-28 h-28 mb-6 group">
                 <div class="absolute inset-0 bg-sci-accent/20 rounded-full blur-xl group-hover:bg-sci-accent/40 transition-all duration-500"></div>
@@ -131,13 +139,13 @@
             </p>
         </div>
 
-        <!-- Chat Messages (Grow to fill space) -->
+        <!-- Chat Messages -->
         <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-6 z-10 scroll-smooth"></div>
 
-        <!-- Input Area (Fixed at Bottom of Flex) -->
+        <!-- Input Area -->
         <div class="flex-none p-3 md:p-5 z-20 bg-white dark:bg-brand-dark border-t border-gray-200 dark:border-gray-700/50">
             
-            <!-- Attachment Preview Area -->
+            <!-- Attachment Preview -->
             <div id="attachmentPreview" class="hidden px-4 py-2 mb-2 flex items-center gap-3 bg-gray-100 dark:bg-brand-card/80 rounded-xl border border-gray-200 dark:border-gray-600">
                 <div id="previewIcon" class="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-sci-accent overflow-hidden relative"></div>
                 <div class="flex-1 min-w-0">
@@ -194,7 +202,7 @@
                             <div><div class="font-bold">Expert</div><div class="text-[10px] text-gray-500">تحليل عميق</div></div>
                         </button>
                         <button onclick="setMode('education')" class="model-option flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-brand-hover rounded-xl text-sm text-left group" data-mode="education">
-                            <div class="w-8 h-8 rounded-full bg-sci-orange/10 text-sci-orange flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-graduation-cap"></i></div>
+                            <div class="w-8 h-8 rounded-full bg-sci-orange/10 text-sci-orange flex items-center justify-center group-hover:scale-100 transition-transform"><i class="fas fa-graduation-cap"></i></div>
                             <div><div class="font-bold">Education</div><div class="text-[10px] text-gray-500">شرح وتعليم</div></div>
                         </button>
                         <button onclick="setMode('script')" class="model-option flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-brand-hover rounded-xl text-sm text-left group" data-mode="script">
@@ -401,6 +409,57 @@
             }
         }
 
+        // --- Typing Effect Logic ---
+        function typeMessage(role, content) {
+            el('welcomeScreen').style.opacity = '0';
+            const isUser = role === 'user';
+            
+            // If user, just show instantly
+            if (isUser) {
+                appendMessage(role, content);
+                return;
+            }
+
+            // For Assistant, create the structure
+            const div = document.createElement('div');
+            div.className = `flex w-full justify-end message-anim mb-6`;
+            
+            const avatar = `<div class="w-8 h-8 rounded-full border border-sci-accent overflow-hidden ml-3 shrink-0"><img src="https://i.postimg.cc/sg2WkBVQ/5792048219872234554-(1).jpg" class="w-full h-full object-cover"></div>`;
+            const bubbleStyle = 'bg-transparent text-gray-800 dark:text-gray-100 w-full';
+            const containerId = 'type-' + Date.now();
+
+            div.innerHTML = `
+                <div class="max-w-[85%] md:max-w-[80%] p-4 ${bubbleStyle} prose dark:prose-invert text-sm md:text-base leading-relaxed shadow-sm cursor-blink" id="${containerId}"></div>
+                ${avatar}
+            `;
+            
+            el('chatContainer').appendChild(div);
+            
+            // Start Typing Loop
+            const container = el(containerId);
+            let index = 0;
+            const step = 4; // chars per tick
+            
+            function nextTick() {
+                if (index < content.length) {
+                    index += step;
+                    const chunk = content.substring(0, index);
+                    // Use marked to render partial HTML. 
+                    // Note: This might cause flicker on complex markdown, but works well for text.
+                    container.innerHTML = DOMPurify.sanitize(marked.parse(chunk));
+                    el('chatContainer').scrollTo({ top: el('chatContainer').scrollHeight, behavior: 'auto' });
+                    requestAnimationFrame(nextTick);
+                } else {
+                    // Final Render
+                    container.innerHTML = DOMPurify.sanitize(marked.parse(content));
+                    container.classList.remove('cursor-blink'); // Stop blinking cursor
+                    el('chatContainer').scrollTo({ top: el('chatContainer').scrollHeight, behavior: 'smooth' });
+                }
+            }
+            nextTick();
+        }
+
+        // Standard append for history
         function appendMessage(role, content) {
             el('welcomeScreen').style.opacity = '0';
             const isUser = role === 'user';
@@ -489,7 +548,10 @@
                 const data = await response.json();
                 const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "عذراً، لم أستطع قراءة ذلك.";
                 document.getElementById(loadId).remove();
-                appendMessage('assistant', reply);
+                
+                // USE TYPING EFFECT HERE
+                typeMessage('assistant', reply);
+
                 state.messages.push(newMessageObj);
                 state.messages.push({ role: "model", parts: [{ text: reply }] });
                 saveChatToHistory(text || `[ملف: ${attachment.name}]`, reply);
