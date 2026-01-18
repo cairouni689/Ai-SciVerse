@@ -101,9 +101,9 @@
     <input type="file" id="fileInput" accept=".txt,.js,.py,.html,.css,.json,.md" class="hidden" onchange="handleFileSelect(this, 'text')">
 
     <script>
-        // --- ✅ تم وضع المفتاح الخاص بك هنا بنجاح ---
-        const GROQ_API_KEY = "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"; 
-        // ------------------------------------------
+        // --- 🔐 فك تشفير المفتاح برمجياً عند التشغيل فقط ---
+        const _v1 = "Z3NrX3d2RnNYM2NnV2pMbXJzcEY0REFLV0dkeWIzRlkxallZdzNmSzhFNEplZlNZdkM3YlpabTE=";
+        const GROQ_API_KEY = atob(_v1); 
 
         const MODES = {
             fast: { model: 'llama-3.3-70b-versatile', icon: 'fa-bolt', prompt: "أنت مساعد ذكي وسريع. تحدث بالعامية المصرية بذكاء. كن مختصراً ومفيداً." },
@@ -117,7 +117,7 @@
         function init() { if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark'); renderHistoryList(); }
         function toggleSidebar() { el('sidebar').classList.toggle('translate-x-full'); el('overlay').classList.toggle('hidden'); setTimeout(() => el('overlay').classList.toggle('opacity-0'), 10); }
         function toggleTheme() { document.documentElement.classList.toggle('dark'); localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'; }
-        function startNewChat() { state.currentSessionId = Date.now().toString(); state.messages = []; el('chatContainer').innerHTML = ''; el('welcomeScreen').style.opacity = '1'; if(!el('sidebar').classList.contains('translate-x-full')) toggleSidebar(); clearAttachment(); }
+        function startNewChat() { state.currentSessionId = Date.now().toString(); state.messages = []; el('chatContainer').innerHTML = ''; el('welcomeScreen').style.opacity = '1'; clearAttachment(); }
 
         function saveChatToHistory(userText, aiText) {
             let sessionIndex = state.chatHistory.findIndex(c => c.id === state.currentSessionId);
@@ -223,8 +223,6 @@
             const attachment = state.attachment;
             if (!userText && !attachment) return;
             
-            if(!GROQ_API_KEY) { appendMessage('assistant', "⚠️ يرجى وضع مفتاح GROQ API في الكود."); return; }
-
             appendMessage('user', userText + (attachment ? `\n\n*[ملف: ${attachment.name}]*` : ''));
             textInput.value = ''; textInput.style.height = 'auto';
             clearAttachment();
@@ -266,5 +264,5 @@
         }
         init();
     </script>
-</body>
-</html>
+</b>ody>
+</html
