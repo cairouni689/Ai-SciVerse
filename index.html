@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ai SciVerse - Ultimate</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Markdown & Sanitize -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',
+                            card: '#1e293b',
+                            hover: '#334155'
+                        },
+                        sci: {
+                            accent: '#00d4ff', // Cyan
+                            purple: '#8b5cf6', // Purple
+                            green: '#10b981',  // Expert Green
+                            orange: '#f59e0b', // Edu Orange
+                            pink: '#ec4899'    // Script Pink
+                        }
+                    },
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom UI Tweaks */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        
+        .prose pre { direction: ltr; background: #0f172a; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; border: 1px solid #334155; }
+        .prose code { font-family: monospace; color: #38bdf8; }
+        
+        .message-anim { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); }
+        
+        /* Floating Menus Animation */
+        .pop-menu { transform-origin: bottom right; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.95); opacity: 0; pointer-events: none; }
+        .pop-menu.active { transform: scale(1); opacity: 1; pointer-events: auto; }
+
+        .mode-active { border-color: currentColor; background-color: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-brand-dark dark:text-gray-100 transition-colors duration-300 h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="h-16 bg-white/90 dark:bg-brand-card/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-30">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-sci-accent shadow-[0_0_15px_rgba(0,212,255,0.3)]">
+                <img src="https://i.postimg.cc/sg2WkBVQ/5792048219872234554-(1).jpg" class="w-full h-full object-cover">
+            </div>
+            <div>
+                <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-sci-accent to-sci-purple">Ai SciVerse</h1>
+                <div class="flex items-center gap-1">
+                    <span id="currentModeBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-sci-accent/10 text-sci-accent border border-sci-accent/20">Fast</span>
+                </div>
+            </div>
+        </div>
+        <button onclick="toggleSidebar()" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-brand-hover transition-colors">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar -->
+    <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden opacity-0 transition-opacity duration-300"></div>
+    <aside id="sidebar" class="fixed top-0 right-0 h-full w-72 bg-white dark:bg-brand-card border-l border-gray-200 dark:border-gray-700 z-50 transform translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-brand-dark/50">
+            <h2 class="font-bold">القائمة</h2>
+            <button onclick="toggleSidebar()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="p-3 space-y-2">
+            <button onclick="startNewChat()" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-sci-accent to-blue-600 text-white p-3 rounded-xl shadow-lg hover:shadow-sci-accent/30 transition-all">
+                <i class="fas fa-plus"></i> محادثة جديدة
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-3">
+            <h3 class="text-xs font-semibold text-gray-400 mb-3 px-1">سجل المحادثات</h3>
+            <div id="historyList" class="space-y-2">
+                <!-- History Items go here -->
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-brand-dark/30">
+            <button onclick="toggleTheme()" class="w-full flex items-center justify-between p-3 rounded-xl bg-white dark:bg-brand-hover border border-gray-200 dark:border-gray-600">
+                <span class="text-sm">المظهر</span>
+                <i class="fas fa-moon dark:hidden text-gray-600"></i>
+                <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Chat Area -->
+    <main class="flex-1 overflow-hidden relative flex flex-col w-full max-w-5xl mx-auto">
+        
+        <!-- Welcome -->
+        <div id="welcomeScreen" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-0 transition-opacity duration-300">
+            <div class="relative w-28 h-28 mb-6 group">
+                <div class="absolute inset-0 bg-sci-accent/20 rounded-full blur-xl group-hover:bg-sci-accent/40 transition-all duration-500"></div>
+                <img src="https://i.postimg.cc/sg2WkBVQ/5792048219872234554-(1).jpg" class="relative w-full h-full rounded-full border-4 border-white dark:border-brand-card shadow-2xl object-cover">
+            </div>
+            <h2 class="text-3xl font-bold mb-3">مرحباً في <span class="bg-clip-text text-transparent bg-gradient-to-r from-sci-accent to-sci-purple">SciVerse</span></h2>
+            <p class="text-gray-500 dark:text-gray-400 max-w-md text-sm leading-relaxed mb-8">
+                اختر النمط المناسب، ارفع الملفات، واستكشف قدرات الذكاء الاصطناعي بلا حدود.
+            </p>
+            
+            <div class="flex flex-wrap justify-center gap-3">
+                <span class="px-3 py-1 rounded-full bg-sci-accent/10 text-sci-accent text-xs border border-sci-accent/20"><i class="fas fa-bolt mr-1"></i> Fast</span>
+                <span class="px-3 py-1 rounded-full bg-sci-green/10 text-sci-green text-xs border border-sci-green/20"><i class="fas fa-brain mr-1"></i> Expert</span>
+                <span class="px-3 py-1 rounded-full bg-sci-orange/10 text-sci-orange text-xs border border-sci-orange/20"><i class="fas fa-graduation-cap mr-1"></i> Edu</span>
+            </div>
+        </div>
+
+        <!-- Chat List -->
+        <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-6 z-10 scroll-smooth pb-32"></div>
+
+        <!-- Input Section -->
+        <div class="absolute bottom-0 left-0 w-full p-3 md:p-5 z-20 bg-gradient-to-t from-white via-white to-transparent dark:from-brand-dark dark:via-brand-dark dark:to-transparent pt-10">
+            
+            <!-- Attachment Preview Area -->
+            <div id="attachmentPreview" class="hidden px-4 py-2 mb-2 flex items-center gap-3 bg-gray-100 dark:bg-brand-card/80 rounded-xl border border-gray-200 dark:border-gray-600 backdrop-blur-sm mx-1 animate-slide-up">
+                <div id="previewIcon" class="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-sci-accent overflow-hidden relative">
+                    <!-- Image or Icon will go here -->
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p id="fileName" class="text-xs font-bold truncate text-gray-700 dark:text-gray-200">file.txt</p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">جاهز للتحليل</p>
+                </div>
+                <button onclick="clearAttachment()" class="w-6 h-6 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Input Bar -->
+            <div class="relative flex items-end gap-2 bg-white dark:bg-brand-card border border-gray-200 dark:border-gray-600 shadow-xl rounded-3xl p-2 transition-all focus-within:ring-2 focus-within:ring-sci-accent/30 focus-within:border-sci-accent/50">
+                
+                <!-- Plus Menu (Attachments) -->
+                <div class="relative">
+                    <button onclick="toggleMenu('plusMenu')" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-plus text-lg"></i>
+                    </button>
+                    <!-- Popover -->
+                    <div id="plusMenu" class="pop-menu absolute bottom-14 right-0 w-48 bg-white dark:bg-brand-card rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-600 overflow-hidden flex flex-col p-1 z-50">
+                        <button onclick="triggerFile('imageInput')" class="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-brand-hover rounded-xl text-sm transition-colors text-left">
+                            <div class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center"><i class="fas fa-image"></i></div>
+                            <span>صورة</span>
+                        </button>
+                        <button onclick="triggerFile('fileInput')" class="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-brand-hover rounded-xl text-sm transition-colors text-left">
+                            <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center"><i class="fas fa-file-alt"></i></div>
+                            <span>ملف نصي/كود</span>
+                        </button>
+                        <button onclick="triggerFile('cameraInput')" class="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-brand-hover rounded-xl text-sm transition-colors text-left md:hidden">
+                            <div class="w-8 h-8 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center"><i class="fas fa-camera"></i></div>
+                            <span>الكاميرا</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Text Area -->
+                <textarea id="userInput" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 resize-none py-3 px-2 max-h-32 text-sm md:text-base custom-scrollbar dark:text-gray-100 placeholder-gray-400" placeholder="اكتب رسالتك..." oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+
+                <!-- Model Selector -->
+                <div class="relative">
+                    <button onclick="toggleMenu('modelMenu')" id="modelBtn" class="w-10 h-10 rounded-full flex items-center justify-center text-sci-accent bg-sci-accent/10 hover:bg-sci-accent/20 transition-all border border-sci-accent/20">
+                        <i class="fas fa-bolt"></i> <!-- Changes based on mode -->
+                    </button>
+                    <!-- Popover -->
+                    <div id="modelMenu" class="pop-menu absolute bottom-14 left-0 w-52 bg-white dark:bg-brand-card rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-600 overflow-hidden flex flex-col p-1 z-50">
+                        <div class="text-[10px] font-bold text-gray-400 px-3 py-2 uppercase tracking-wider">Select Mode</div>
+                        <button onclick="setMode('fast')" class="model-option flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-brand-hover rounded-xl text-sm text-left group" data-mode="fast">
+                            <div class="w-8 h-8 rounded-full bg-sci-accent/10 text-sci-accent flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-bolt"></i></div>
+                            <div>
+                                <div class="font-bold">Fast</div>
+                                <div class="text-[10px] text-gray-500">سريع ومختصر</div>
+                            </div>
+                        </button>
+                        <button onclick="setMode('expert')" class="model-option flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-brand-hover rounded-xl text-sm text-left group" data-mode="expert">
+                            <div class="w-8 h-8 rounded-full bg-sci-green/10 text-sci-green flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-brain"></i></div>
+                            <div>
+                                <div class="font-bold">Expert</div>
+                                <div class="text-[10px] text-gray-500">تحليل عميق ودقيق</div>
+                            </div>
+                        </button>
+                        <button onclick="setMode('education')" class="model-option flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-brand-hover rounded-xl text-sm text-left group" data-mode="education">
+                            <div class="w-8 h-8 rounded-full bg-sci-orange/10 text-sci-orange flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-graduation-cap"></i></div>
+                            <div>
+                                <div class="font-bold">Education</div>
+                                <div class="text-[10px] text-gray-500">شرح وتعليم</div>
+                            </div>
+                        </button>
+                        <button onclick="setMode('script')" class="model-option flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-brand-hover rounded-xl text-sm text-left group" data-mode="script">
+                            <div class="w-8 h-8 rounded-full bg-sci-pink/10 text-sci-pink flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-scroll"></i></div>
+                            <div>
+                                <div class="font-bold">Script</div>
+                                <div class="text-[10px] text-gray-500">كتابة محتوى فيديو</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Send Button -->
+                <button onclick="sendMessage()" id="sendBtn" class="w-10 h-10 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center hover:scale-105 transition-transform shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Hidden Inputs -->
+    <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleFileSelect(this, 'image')">
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelect(this, 'image')">
+    <input type="file" id="fileInput" accept=".txt,.js,.py,.html,.css,.json,.md,.csv" class="hidden" onchange="handleFileSelect(this, 'text')">
+
+    <script>
+        // ******************************************************
+        // ************** API KEY *****************************
+        // ******************************************************
+        const GOOGLE_API_KEY = "AIzaSyClE2QZFkHo_d0yJyZirurRYy-9byemIak"; 
+        // ******************************************************
+
+        // --- Configuration & State ---
+        const MODES = {
+            fast: {
+                icon: 'fa-bolt', color: 'text-sci-accent', badge: 'bg-sci-accent/10',
+                prompt: "أنت مساعد ذكي وسريع. قدم إجابات مباشرة ومختصرة للغاية دون حشو. ركز على المعلومة الأساسية."
+            },
+            expert: {
+                icon: 'fa-brain', color: 'text-sci-green', badge: 'bg-sci-green/10',
+                prompt: "أنت خبير استشاري متمرس. فكر بعمق، حلل المشكلة خطوة بخطوة (Chain of Thought)، وقدم إجابات دقيقة جداً، شاملة، واحترافية. استخدم المصطلحات التقنية عند الحاجة واشرحها."
+            },
+            education: {
+                icon: 'fa-graduation-cap', color: 'text-sci-orange', badge: 'bg-sci-orange/10',
+                prompt: "أنت معلم صبور ومتميز. اشرح المفاهيم بأسلوب مبسط (Socratic method)، استخدم الأمثلة والتشبيهات، وتأكد من فهم الطالب. في النهاية، اقترح سؤالاً صغيراً للتأكد من الفهم."
+            },
+            script: {
+                icon: 'fa-scroll', color: 'text-sci-pink', badge: 'bg-sci-pink/10',
+                prompt: "أنت كاتب سيناريو محترف (YouTuber/Content Creator). اكتب الرد بتنسيق سكربت: 1. الخطاف (Hook) لجذب الانتباه. 2. المحتوى (Body) مقسم لنقاط. 3. الخاتمة والدعوة لاتخاذ إجراء (CTA). اجعل الأسلوب حماسياً وجذاباً."
+            }
+        };
+
+        let state = {
+            mode: 'fast',
+            chatHistory: JSON.parse(localStorage.getItem('sciverse_chats')) || [],
+            currentSessionId: Date.now().toString(),
+            messages: [],
+            attachment: null // { type: 'image'|'text', content: 'base64/text', name: '' }
+        };
+
+        // DOM Elements
+        const el = id => document.getElementById(id);
+        
+        // --- Initialization ---
+        function init() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+            renderHistoryList();
+            
+            // Check if there are messages in current session (if reloaded page but kept session ID logic - simplified here to always new or load last)
+            if (state.chatHistory.length > 0) {
+                // Load the most recent chat by default or stay empty? Let's stay empty for "New Chat" feel unless clicked.
+            }
+        }
+
+        // --- Sidebar Logic ---
+        function toggleSidebar() {
+            const sb = el('sidebar');
+            const ov = el('overlay');
+            if (sb.classList.contains('translate-x-full')) {
+                sb.classList.remove('translate-x-full');
+                ov.classList.remove('hidden');
+                setTimeout(() => ov.classList.remove('opacity-0'), 10);
+            } else {
+                sb.classList.add('translate-x-full');
+                ov.classList.add('opacity-0');
+                setTimeout(() => ov.classList.add('hidden'), 300);
+            }
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        }
+
+        // --- Chat History Logic ---
+        function startNewChat() {
+            state.currentSessionId = Date.now().toString();
+            state.messages = [];
+            el('chatContainer').innerHTML = '';
+            el('welcomeScreen').style.opacity = '1';
+            el('welcomeScreen').style.pointerEvents = 'auto';
+            toggleSidebar();
+            // Clear attachment
+            clearAttachment();
+        }
+
+        function saveChatToHistory(userText, aiText) {
+            // Find existing session
+            let sessionIndex = state.chatHistory.findIndex(c => c.id === state.currentSessionId);
+            
+            if (sessionIndex === -1) {
+                // New Session
+                const newSession = {
+                    id: state.currentSessionId,
+                    title: userText.substring(0, 30) + (userText.length > 30 ? '...' : ''),
+                    timestamp: Date.now(),
+                    messages: [
+                        { role: 'user', content: userText },
+                        { role: 'model', content: aiText }
+                    ]
+                };
+                state.chatHistory.unshift(newSession); // Add to top
+            } else {
+                // Update Session
+                state.chatHistory[sessionIndex].messages.push({ role: 'user', content: userText });
+                state.chatHistory[sessionIndex].messages.push({ role: 'model', content: aiText });
+                state.chatHistory[sessionIndex].timestamp = Date.now(); // Update time
+                // Move to top
+                const session = state.chatHistory.splice(sessionIndex, 1)[0];
+                state.chatHistory.unshift(session);
+            }
+            
+            // Limit history to 20 chats
+            if (state.chatHistory.length > 20) state.chatHistory.pop();
+
+            localStorage.setItem('sciverse_chats', JSON.stringify(state.chatHistory));
+            renderHistoryList();
+        }
+
+        function renderHistoryList() {
+            const container = el('historyList');
+            container.innerHTML = '';
+            
+            if (state.chatHistory.length === 0) {
+                container.innerHTML = `<div class="text-center text-xs text-gray-400 py-4">لا توجد محادثات سابقة</div>`;
+                return;
+            }
+
+            state.chatHistory.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-brand-hover cursor-pointer transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600 group`;
+                div.onclick = () => loadChat(chat.id);
+                div.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-medium truncate w-48 text-gray-700 dark:text-gray-200">${chat.title}</div>
+                        <button onclick="deleteChat(event, '${chat.id}')" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fas fa-trash text-xs"></i></button>
+                    </div>
+                    <div class="text-[10px] text-gray-400 mt-1">${new Date(chat.timestamp).toLocaleDateString('ar-EG')}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function loadChat(id) {
+            const chat = state.chatHistory.find(c => c.id === id);
+            if (!chat) return;
+
+            state.currentSessionId = chat.id;
+            state.messages = []; // We will rebuild context from saved messages for the API, but for UI we assume loaded
+            
+            // Clear UI
+            el('chatContainer').innerHTML = '';
+            el('welcomeScreen').style.opacity = '0';
+            el('welcomeScreen').style.pointerEvents = 'none';
+
+            // Render Messages
+            chat.messages.forEach(msg => {
+                appendMessage(msg.role === 'user' ? 'user' : 'assistant', msg.content);
+                // Rebuild state messages for context if needed (omitted for brevity, we start context fresh or push all)
+                // For a real app, you'd push these to state.messages to keep context.
+                state.messages.push({ role: msg.role, parts: [{ text: msg.content }] });
+            });
+            
+            toggleSidebar();
+        }
+
+        function deleteChat(e, id) {
+            e.stopPropagation();
+            state.chatHistory = state.chatHistory.filter(c => c.id !== id);
+            localStorage.setItem('sciverse_chats', JSON.stringify(state.chatHistory));
+            renderHistoryList();
+            if (state.currentSessionId === id) startNewChat();
+        }
+
+        // --- Modes & Menus ---
+        function toggleMenu(id) {
+            const menu = el(id);
+            // Close others
+            document.querySelectorAll('.pop-menu').forEach(m => {
+                if(m.id !== id) m.classList.remove('active');
+            });
+            menu.classList.toggle('active');
+        }
+
+        // Close menus when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.relative')) {
+                document.querySelectorAll('.pop-menu').forEach(m => m.classList.remove('active'));
+            }
+        });
+
+        function setMode(modeKey) {
+            state.mode = modeKey;
+            const mode = MODES[modeKey];
+            
+            // Update Icon
+            const btn = el('modelBtn');
+            btn.innerHTML = `<i class="fas ${mode.icon}"></i>`;
+            btn.className = `w-10 h-10 rounded-full flex items-center justify-center transition-all border border-transparent ${mode.color} bg-white dark:bg-transparent dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-brand-hover`; // Reset classes logic slightly complex, simplified:
+            // Just update the badge and icon
+            el('currentModeBadge').textContent = modeKey.charAt(0).toUpperCase() + modeKey.slice(1);
+            el('currentModeBadge').className = `text-[10px] px-1.5 py-0.5 rounded border ${mode.badge} ${mode.color.replace('text', 'border').replace('500','200')}`; // Approximate
+
+            // Highlight in menu
+            document.querySelectorAll('.model-option').forEach(opt => {
+                if (opt.dataset.mode === modeKey) opt.classList.add('bg-gray-100', 'dark:bg-brand-hover');
+                else opt.classList.remove('bg-gray-100', 'dark:bg-brand-hover');
+            });
+
+            toggleMenu('modelMenu');
+        }
+
+        // --- File Handling ---
+        function triggerFile(id) {
+            el(id).click();
+            toggleMenu('plusMenu');
+        }
+
+        function handleFileSelect(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const content = e.target.result; // Base64 or Text
+                
+                state.attachment = {
+                    type: type,
+                    name: file.name,
+                    content: content, // Full Data URL
+                    mimeType: file.type
+                };
+
+                // Update Preview UI
+                const prev = el('attachmentPreview');
+                const iconBox = el('previewIcon');
+                
+                if (type === 'image') {
+                    iconBox.innerHTML = `<img src="${content}" class="w-full h-full object-cover">`;
+                } else {
+                    iconBox.innerHTML = `<i class="fas fa-file-alt text-xl"></i>`;
+                }
+                
+                el('fileName').textContent = file.name;
+                prev.classList.remove('hidden');
+                prev.classList.add('flex');
+            };
+
+            if (type === 'image') {
+                reader.readAsDataURL(file);
+            } else {
+                reader.readAsText(file);
+            }
+            
+            input.value = ''; // Reset
+        }
+
+        function clearAttachment() {
+            state.attachment = null;
+            el('attachmentPreview').classList.add('hidden');
+            el('attachmentPreview').classList.remove('flex');
+        }
+
+        // --- Chat UI Helper ---
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function appendMessage(role, content) {
+            el('welcomeScreen').style.opacity = '0';
+            el('welcomeScreen').style.pointerEvents = 'none';
+
+            const isUser = role === 'user';
+            const div = document.createElement('div');
+            div.className = `flex w-full ${isUser ? 'justify-start' : 'justify-end'} message-anim mb-6`;
+
+            const avatar = isUser 
+                ? `<div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center ml-3 shrink-0"><i class="fas fa-user text-gray-500"></i></div>`
+                : `<div class="w-8 h-8 rounded-full border border-sci-accent overflow-hidden ml-3 shrink-0"><img src="https://i.postimg.cc/sg2WkBVQ/5792048219872234554-(1).jpg" class="w-full h-full object-cover"></div>`;
+
+            const bubbleStyle = isUser
+                ? 'bg-gray-100 dark:bg-brand-card text-gray-800 dark:text-gray-100 rounded-2xl rounded-tr-sm'
+                : 'bg-transparent text-gray-800 dark:text-gray-100 w-full';
+
+            const htmlContent = isUser ? content.replace(/\n/g, '<br>') : DOMPurify.sanitize(marked.parse(content));
+
+            div.innerHTML = `
+                ${isUser ? avatar : ''}
+                <div class="max-w-[85%] md:max-w-[80%] p-4 ${bubbleStyle} prose dark:prose-invert text-sm md:text-base leading-relaxed shadow-sm">
+                    ${htmlContent}
+                </div>
+                ${!isUser ? avatar : ''}
+            `;
+
+            el('chatContainer').appendChild(div);
+            el('chatContainer').scrollTo({ top: el('chatContainer').scrollHeight, behavior: 'smooth' });
+        }
+
+        function showLoading() {
+            const id = 'loader-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'flex w-full justify-end message-anim mb-6';
+            div.innerHTML = `
+                <div class="bg-transparent p-4 rounded-2xl">
+                    <div class="flex gap-1">
+                        <div class="w-2 h-2 bg-sci-accent rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-sci-accent rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-sci-accent rounded-full typing-dot"></div>
+                    </div>
+                </div>
+                <div class="w-8 h-8 rounded-full border border-sci-accent overflow-hidden ml-3 shrink-0"><img src="https://i.postimg.cc/sg2WkBVQ/5792048219872234554-(1).jpg" class="w-full h-full object-cover"></div>
+            `;
+            el('chatContainer').appendChild(div);
+            el('chatContainer').scrollTop = el('chatContainer').scrollHeight;
+            return id;
+        }
+
+        // --- Core: Send Message ---
+        async function sendMessage() {
+            const input = el('userInput');
+            const text = input.value.trim();
+            const attachment = state.attachment;
+            
+            if ((!text && !attachment) || !GOOGLE_API_KEY) return;
+
+            // 1. Prepare UI
+            let userDisplay = text;
+            if (attachment) {
+                userDisplay += `\n\n*[مرفق: ${attachment.name}]*`;
+            }
+            appendMessage('user', userDisplay);
+            
+            input.value = '';
+            input.style.height = 'auto';
+            clearAttachment(); // Remove from UI
+            
+            const loadId = showLoading();
+            el('sendBtn').disabled = true;
+
+            try {
+                // 2. Prepare Payload
+                const currentMode = MODES[state.mode];
+                const systemInstruction = { parts: [{ text: currentMode.prompt }] };
+
+                // Build Context (Previous messages)
+                const contents = state.messages.map(m => ({
+                    role: m.role === 'user' ? 'user' : 'model',
+                    parts: m.parts
+                }));
+
+                // Build Current Message
+                const newParts = [];
+                if (text) newParts.push({ text: text });
+
+                if (attachment) {
+                    if (attachment.type === 'image') {
+                        // Image Handling
+                        const base64Data = attachment.content.split(',')[1];
+                        newParts.push({
+                            inlineData: {
+                                mimeType: attachment.mimeType,
+                                data: base64Data
+                            }
+                        });
+                    } else {
+                        // Text File Handling
+                        newParts.push({
+                            text: `\n\n[محتوى الملف ${attachment.name}]:\n${attachment.content}\n`
+                        });
+                    }
+                }
+
+                const newMessageObj = { role: "user", parts: newParts };
+                contents.push(newMessageObj);
+
+                // 3. API Call
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GOOGLE_API_KEY}`;
+                
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: contents,
+                        systemInstruction: systemInstruction
+                    })
+                });
+
+                if (!response.ok) throw new Error("API Error");
+                const data = await response.json();
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "عذراً، لم أستطع قراءة ذلك.";
+
+                // 4. Update UI & State
+                document.getElementById(loadId).remove();
+                appendMessage('assistant', reply);
+
+                state.messages.push(newMessageObj);
+                state.messages.push({ role: "model", parts: [{ text: reply }] });
+
+                // 5. Save to History
+                saveChatToHistory(text || `[ملف: ${attachment.name}]`, reply);
+
+            } catch (error) {
+                document.getElementById(loadId).remove();
+                appendMessage('assistant', `⚠️ **خطأ:** ${error.message}`);
+                console.error(error);
+            } finally {
+                el('sendBtn').disabled = false;
+                input.focus();
+            }
+        }
+
+        // Run Init
+        init();
+    </script>
+</body>
+</html>
+
+
+
