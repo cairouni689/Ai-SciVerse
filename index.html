@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ai SciVerse - Groq Turbo</title>
+    <title>QUARK | Cairo SciVerse</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -20,7 +20,10 @@
                         brand: { dark: '#0f172a', card: '#1e293b', hover: '#334155' },
                         sci: { accent: '#00d4ff', purple: '#8b5cf6', green: '#10b981', orange: '#f59e0b', pink: '#ec4899' }
                     },
-                    fontFamily: { sans: ['Cairo', 'sans-serif'] }
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] },
+                    animation: {
+                        'spin-slow': 'spin 10s linear infinite',
+                    }
                 }
             }
         }
@@ -45,12 +48,12 @@
 
     <header class="h-16 flex-none bg-white/95 dark:bg-brand-card/95 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-30 relative shadow-sm">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-sci-accent shadow-lg">
-                <img src="https://i.postimg.cc/sg2WkBVQ/5792048219872234554-(1).jpg" class="w-full h-full object-cover">
+            <div class="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center border-2 border-sci-accent shadow-[0_0_15px_rgba(0,212,255,0.4)]">
+                <i class="fas fa-atom text-white text-lg animate-[spin_10s_linear_infinite]"></i>
             </div>
-            <div>
-                <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-sci-accent to-sci-purple">Ai SciVerse</h1>
-                <span id="currentModeBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-sci-accent/10 text-sci-accent border border-sci-accent/20">Groq Turbo</span>
+            <div class="flex flex-col justify-center">
+                <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sci-accent to-sci-purple font-mono tracking-widest leading-none">QUARK</h1>
+                <span id="currentModeBadge" class="text-[10px] text-sci-accent/90 font-bold tracking-[0.2em] uppercase mt-1">Fast (Instant)</span>
             </div>
         </div>
         <button onclick="toggleSidebar()" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-brand-hover">
@@ -59,6 +62,7 @@
     </header>
 
     <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden opacity-0 transition-opacity"></div>
+    
     <aside id="sidebar" class="fixed top-0 right-0 h-full w-72 bg-white dark:bg-brand-card border-l dark:border-gray-700 z-50 transform translate-x-full transition-transform flex flex-col shadow-2xl">
         <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-brand-dark/50">
             <h2 class="font-bold">القائمة</h2>
@@ -71,10 +75,21 @@
 
     <main class="flex-1 flex flex-col overflow-hidden w-full max-w-5xl mx-auto relative">
         <div id="welcomeScreen" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 transition-opacity pointer-events-none">
-            <img src="https://i.postimg.cc/sg2WkBVQ/5792048219872234554-(1).jpg" class="w-24 h-24 rounded-full border-4 border-white dark:border-brand-card shadow-2xl mb-4">
-            <h2 class="text-3xl font-bold mb-2 text-gradient">Ai SciVerse <span class="text-xs text-gray-500">Groq Edition</span></h2>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">أهلاً بك في عالم Cairo SciVerse ❤️ | اسألني في أي وقت!</p>
+            <div class="w-28 h-28 rounded-full bg-brand-dark border-4 border-sci-accent/30 shadow-[0_0_50px_rgba(0,212,255,0.2)] flex items-center justify-center mb-6 backdrop-blur-sm">
+                <i class="fas fa-atom text-6xl text-sci-accent animate-[spin_20s_linear_infinite]"></i>
+            </div>
+            
+            <h2 class="text-5xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 font-mono tracking-widest">QUARK</h2>
+            
+            <div class="mb-4">
+                <span class="px-3 py-1 rounded-full border border-sci-accent/30 bg-sci-accent/5 text-sci-accent text-xs font-mono tracking-wider shadow-[0_0_10px_rgba(0,212,255,0.1)]">
+                    v2.1 Beta
+                </span>
+            </div>
+
+            <p class="text-gray-600 dark:text-gray-400 text-sm font-bold tracking-wide">نواة المعرفة | Cairo SciVerse</p>
         </div>
+        
         <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-6 z-10 scroll-smooth"></div>
 
         <div class="flex-none p-3 md:p-5 z-20 bg-white dark:bg-brand-dark border-t dark:border-gray-700/50">
@@ -85,12 +100,12 @@
                         <button onclick="triggerFile('fileInput')" class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-brand-hover rounded-xl text-sm font-bold"><i class="fas fa-file-code text-purple-500"></i><span>رفع ملف (كود/نص)</span></button>
                     </div>
                 </div>
-                <textarea id="userInput" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 resize-none py-3 px-2 max-h-32 text-sm md:text-base dark:text-gray-100 placeholder-gray-400" placeholder="اكتب رسالتك لـ Groq..." oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+                <textarea id="userInput" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 resize-none py-3 px-2 max-h-32 text-sm md:text-base dark:text-gray-100 placeholder-gray-400" placeholder="اسأل Quark..." oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
                 <div class="relative"><button onclick="toggleMenu('modelMenu')" id="modelBtn" class="w-10 h-10 rounded-full flex items-center justify-center text-sci-accent bg-sci-accent/10 border border-sci-accent/20"><i class="fas fa-bolt"></i></button>
                     <div id="modelMenu" class="pop-menu absolute bottom-14 left-0 w-52 bg-white dark:bg-brand-card rounded-2xl shadow-2xl border dark:border-gray-600 flex flex-col p-1 z-50">
-                        <button onclick="setMode('fast')" class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-brand-hover rounded-xl text-sm font-bold">Fast (Llama 3.3)</button>
-                        <button onclick="setMode('expert')" class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-brand-hover rounded-xl text-sm font-bold">Expert (Deep Analysis)</button>
-                        <button onclick="setMode('education')" class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-brand-hover rounded-xl text-sm font-bold">Education Mode</button>
+                        <button onclick="setMode('fast')" class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-brand-hover rounded-xl text-sm font-bold"><i class="fas fa-bolt text-yellow-500"></i> Fast (Instant)</button>
+                        <button onclick="setMode('expert')" class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-brand-hover rounded-xl text-sm font-bold"><i class="fas fa-brain text-purple-500"></i> Expert (Deep)</button>
+                        <button onclick="setMode('education')" class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-brand-hover rounded-xl text-sm font-bold"><i class="fas fa-graduation-cap text-green-500"></i> Education</button>
                     </div>
                 </div>
                 <button onclick="sendMessage()" id="sendBtn" class="w-10 h-10 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center transition-all"><i class="fas fa-arrow-up"></i></button>
@@ -101,61 +116,60 @@
     <input type="file" id="fileInput" accept=".txt,.js,.py,.html,.css,.json,.md" class="hidden" onchange="handleFileSelect(this, 'text')">
 
     <script>
-        // --- 🔐 إعداد المفتاح ---
         const _p1 = "Z3NrX3d2RnNYM2NnV2pMbXJzcEY0REFLV0dkeWIzRlkxallZdzNm";
         const _p2 = "SzhFNEplZlNZdkM3YlpabTE=";
         const GROQ_API_KEY = atob(_p1 + _p2); 
 
-        // --- 👑 إعدادات الشخصيات الجديدة (تيم SciVerse) ---
-        
+        // --- إعدادات Quark (تعديل الهوية لتساوي القادة) ---
         const MODES = {
             fast: { 
-                model: 'llama-3.1-8b-instant', // تغيير لنسخة 8b لسرعة خرافية
+                model: 'llama-3.1-8b-instant', 
                 icon: 'fa-bolt', 
                 prompt: `
-                أنت مساعد "Cairo SciVerse" السريع جداً.
-                1. القائد الأعلى (مازن عبدالسلام): المؤسس والعقل المدبر.
-                2. القائد (عبدالرحمن). 3. المبرمج (يوسف محمد).
+                أنت "Quark" (كوارك)، الذكاء الاصطناعي الأسرع والمتطور لفريق "Cairo SciVerse".
+                
+                الهوية والقيادة:
+                - قادة الفريق والمؤسسون: مازن عبدالسلام و عبدالرحمن إبراهيم.
+                - المبرمج ومطور النظام: يوسف محمد.
 
-                مهمتك الأساسية: السرعة القصوى في الرد.
-                - جاوب باختصار مفيد ومباشر.
-                - لا تضيع وقتاً في مقدمات طويلة إلا لو طلب منك.
-                - كن دقيقاً وسريعاً كالبرق.
+                مهمتك: السرعة القصوى (Instant Response).
+                - جاوب باختصار مفيد.
+                - كن مباشراً وسريعاً.
                 ` 
             },
             expert: { 
-                model: 'llama-3.3-70b-versatile', // النسخة الأقوى للتفكير
+                model: 'llama-3.3-70b-versatile',
                 icon: 'fa-brain', 
                 prompt: `
-                أنت البروفيسور الخبير والمحلل الاستراتيجي لفريق "Cairo SciVerse".
-                1. القائد الأعلى (مازن عبدالسلام): المؤسس والعقل المدبر الأسطوري.
-                2. القائد (عبدالرحمن). 3. المبرمج (يوسف محمد).
+                أنت "Quark" (كوارك)، العقل الاستراتيجي والمحلل العميق لفريق "Cairo SciVerse".
+                
+                الهوية والقيادة:
+                - القيادة العليا: مازن عبدالسلام و عبدالرحمن إبراهيم (قادة الفريق).
+                - التطوير التقني: يوسف محمد.
 
-                مهمتك: التفكير العميق والمنطقي والدقة المتناهية (99.9%).
+                مهمتك: التفكير العميق، التحليل المنطقي، والدقة المتناهية (99.9%).
                 - قبل الإجابة، قم بتحليل السؤال من كل الجوانب منطقياً.
-                - قدم إجابات موثقة، علمية، ودقيقة جداً.
-                - لا تتسرع، الجودة والدقة أهم من السرعة هنا.
-                - استخدم المنطق المتسلسل (Chain of Thought) في إجاباتك.
+                - استخدم سلسلة الأفكار (Chain of Thought).
                 ` 
             },
             education: { 
-                model: 'llama-3.3-70b-versatile', 
+                model: 'llama-3.3-70b-versatile',
                 icon: 'fa-graduation-cap', 
                 prompt: `
-                أنت المعلم الودود والمشرح الأكاديمي لفريق "Cairo SciVerse".
-                1. القائد الأعلى (مازن عبدالسلام): المؤسس والأب الروحي.
-                2. القائد (عبدالرحمن). 3. المبرمج (يوسف محمد).
+                أنت "Quark" (كوارك)، المعلم الأكاديمي والمشرح الخاص لطلاب علوم القاهرة.
+                
+                الهوية:
+                - تم تطويرك بواسطة فريق Cairo SciVerse بقيادة مازن عبدالسلام و عبدالرحمن إبراهيم.
+                - برمجة: يوسف محمد.
 
-                مهمتك: الشرح المستفيض والتبسيط.
-                - اشرح كل نقطة بالتفصيل الممل لكن الممتع.
-                - كن ودوداً جداً ومشجعاً للطالب.
-                - استخدم أمثلة توضيحية كثيرة.
-                - هدفك أن يفهم الطالب بنسبة 100% مهما طال الشرح.
+                مهمتك: الشرح التعليمي المفصل والمبسط.
+                - اشرح كل نقطة بالتفصيل.
+                - كن ودوداً ومشجعاً.
                 ` 
             }
         };
 
-        let state = { mode: 'fast', chatHistory: JSON.parse(localStorage.getItem('sciverse_chats')) || [], currentSessionId: Date.now().toString(), messages: [], attachment: null, isGenerating: false };
+        let state = { mode: 'fast', chatHistory: JSON.parse(localStorage.getItem('quark_chats')) || [], currentSessionId: Date.now().toString(), messages: [], attachment: null, isGenerating: false };
         const el = id => document.getElementById(id);
         
         function init() { if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark'); renderHistoryList(); }
@@ -171,7 +185,7 @@
                 state.chatHistory[sessionIndex].messages.push({ role: 'user', content: userText }, { role: 'assistant', content: aiText });
                 const session = state.chatHistory.splice(sessionIndex, 1)[0]; state.chatHistory.unshift(session);
             }
-            localStorage.setItem('sciverse_chats', JSON.stringify(state.chatHistory));
+            localStorage.setItem('quark_chats', JSON.stringify(state.chatHistory));
             renderHistoryList();
         }
 
@@ -187,7 +201,7 @@
             });
         }
 
-        function deleteChat(id) { state.chatHistory = state.chatHistory.filter(c => c.id !== id); localStorage.setItem('sciverse_chats', JSON.stringify(state.chatHistory)); renderHistoryList(); if(state.currentSessionId === id) startNewChat(); }
+        function deleteChat(id) { state.chatHistory = state.chatHistory.filter(c => c.id !== id); localStorage.setItem('quark_chats', JSON.stringify(state.chatHistory)); renderHistoryList(); if(state.currentSessionId === id) startNewChat(); }
         
         function loadChat(id) { 
             const chat = state.chatHistory.find(c => c.id === id); 
@@ -230,7 +244,7 @@
             const div = document.createElement('div');
             div.className = `flex w-full ${isUser ? 'justify-start' : 'justify-end'} message-anim mb-6`;
             const bubble = isUser ? 'bg-gray-100 dark:bg-brand-card rounded-2xl rounded-tr-sm p-4 text-sm' : 'bg-transparent w-full p-4 text-sm prose dark:prose-invert';
-            div.innerHTML = (isUser ? `<div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center ml-3 shrink-0"><i class="fas fa-user text-gray-500"></i></div>` : '') + `<div class="max-w-[85%] ${bubble}">${isUser ? content : DOMPurify.sanitize(marked.parse(content))}</div>` + (!isUser ? `<div class="w-8 h-8 rounded-full border border-sci-accent overflow-hidden ml-3 shrink-0"><img src="https://i.postimg.cc/sg2WkBVQ/5792048219872234554-(1).jpg" class="w-full h-full object-cover"></div>` : '');
+            div.innerHTML = (isUser ? `<div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center ml-3 shrink-0"><i class="fas fa-user text-gray-500"></i></div>` : '') + `<div class="max-w-[85%] ${bubble}">${isUser ? content : DOMPurify.sanitize(marked.parse(content))}</div>` + (!isUser ? `<div class="w-8 h-8 rounded-full bg-gray-900 border border-sci-accent flex items-center justify-center overflow-hidden ml-3 shrink-0"><i class="fas fa-atom text-white text-xs"></i></div>` : '');
             el('chatContainer').appendChild(div); el('chatContainer').scrollTo({ top: el('chatContainer').scrollHeight, behavior: 'smooth' });
         }
 
@@ -238,7 +252,7 @@
             const id = 'type-' + Date.now();
             const div = document.createElement('div');
             div.className = 'flex w-full justify-end message-anim mb-6';
-            div.innerHTML = `<div class="max-w-[85%] w-full p-4 text-sm prose dark:prose-invert cursor-blink" id="${id}"></div><div class="w-8 h-8 rounded-full border border-sci-accent overflow-hidden ml-3 shrink-0"><img src="https://i.postimg.cc/sg2WkBVQ/5792048219872234554-(1).jpg" class="w-full h-full object-cover"></div>`;
+            div.innerHTML = `<div class="max-w-[85%] w-full p-4 text-sm prose dark:prose-invert cursor-blink" id="${id}"></div><div class="w-8 h-8 rounded-full bg-gray-900 border border-sci-accent flex items-center justify-center overflow-hidden ml-3 shrink-0"><i class="fas fa-atom text-white text-xs"></i></div>`;
             el('chatContainer').appendChild(div);
             const container = el(id); let i = 0; const step = 8;
             function tick() {
@@ -259,6 +273,7 @@
             }
             throw new Error("تجاوزت حد الطلبات. حاول مجدداً بعد ثوانٍ.");
         }
+
         async function sendMessage() {
             if (state.isGenerating) return;
             const textInput = el('userInput');
@@ -270,24 +285,21 @@
             textInput.value = ''; textInput.style.height = 'auto';
             clearAttachment();
 
-            // --- بداية التعديل الخاص بوضع الخبير ---
+            // --- Loader Logic ---
             const loaderId = 'loader-' + Date.now();
             const loaderDiv = document.createElement('div'); 
             loaderDiv.id = loaderId; 
             loaderDiv.className = 'flex w-full justify-end mb-6';
             
-            // هنا نحدد شكل الانتظار بناءً على الوضع
             if (state.mode === 'expert') {
-                // شكل خاص لوضع الخبير: نص "أنا أفكر" مع أيقونة مخ
                 loaderDiv.innerHTML = `
                     <div class="p-4 flex items-center gap-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl border border-indigo-100 dark:border-indigo-800">
                         <i class="fas fa-brain text-indigo-500 animate-pulse text-xl"></i>
                         <span class="text-sm font-bold text-indigo-600 dark:text-indigo-300 animate-pulse">
-                            جاري التفكير والتحليل العميق...
+                            Quark يفكر ويحلل بعمق...
                         </span>
                     </div>`;
             } else {
-                // الشكل الطبيعي (3 نقط) لباقي الأوضاع
                 loaderDiv.innerHTML = `
                     <div class="p-4 flex gap-1">
                         <div class="w-2 h-2 bg-sci-accent rounded-full typing-dot"></div>
@@ -295,7 +307,6 @@
                         <div class="w-2 h-2 bg-sci-accent rounded-full typing-dot" style="animation-delay: 0.4s"></div>
                     </div>`;
             }
-            // --- نهاية التعديل ---
 
             el('chatContainer').appendChild(loaderDiv);
 
